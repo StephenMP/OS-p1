@@ -1,0 +1,47 @@
+Name: Stephen Porter
+Updated: 
+Assignment: Project 1
+
+=======
+Design
+=======
+Organization:
+  Considerations:
+    - Parsing input
+      -- Will need to match execvp args
+    - Using list
+      -- Simple job control
+      -- Need an object reflecting a job
+        --- Needs to store job id, pid, status, and command input
+    - Background processes
+      -- Forking and managing parent, children, and zombies
+  
+  Decisions:
+    - I need a main loop, this can be contained in mydash itself
+      -- Should own our job list
+      -- Will probably own the built in commands (jobs, cd, exit)
+      -- Should only worry about itself, no extrenous tasks
+    - I need a parser for input, this can be it's own file
+      -- Maybe this class can own some check methods for whitespace
+      -- Must be able to match execvp's arguments
+      -- Can't fully abstract (I think I'll have to manipulate the string)
+    - I need some sort of job control, this can be it's own file
+      -- Will probably need a handle to our list
+      -- Needs the following
+        --- Ability to check up on running tasks
+        --- Ability to kill jobs (in case of exit while jobs are running)
+        --- Ability to clean our list of done jobs
+    - 
+
+Testing
+  I will use the first example in the mydash example from the examples repo. I will have to touch it up a bit though as it hard codes test paths. I really liked Buff's testing framework for the interpreter assignment in CS 354, I think I'll adapt it to this testing framework to run unit-style tests. I could possibly make it a part of my build process to mimick some continuous integration.
+
+======
+Files
+======
+  
+
+===========
+Discussion
+===========
+
