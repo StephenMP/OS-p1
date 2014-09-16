@@ -1,5 +1,5 @@
 Name: Stephen Porter
-Updated: 
+Updated: 10/03/2014
 Assignment: Project 1
 
 =======
@@ -39,9 +39,47 @@ Testing
 ======
 Files
 ======
-  
+  .git
+  include -- (post make call) - Has all the header files
+      common.h - Common typedefs
+      JobManager.h
+      List.h
+      Node.h
+      Object.h
+      ourhdr.h
+      Parser.h
+  lib -- (post make call)
+      libmylib.a
+      libmylib.so
+  libsrc
+      common.h
+      List.c
+      List.h
+      Makefile
+      Node.c
+      Node.h
+      Object.c	- Implements our job object
+      Object.h	- Contains our definition of a job
+  test-harness  - Contains unit-style tests for mydash
+      run    	- A script to run the tests in this directory
+      test-* 	- Test folders containing test information
+  doxygen-config
+  error.c
+  JobManager.c	- Handles all the job control
+  Makefile
+  mydash.c	- The terminal
+  Parser.c	- Handles all user command parsing
+  README
+  README.dox
+  valgrind.supp
 
 ===========
 Discussion
 ===========
+I both hated and enjoyed this project. I enjoyed learning more about system programming in Linux, and I can definitely say my C has gotten better. I understand a lot more about the Linux OS and systems programming.
 
+Now for the hate. The number one thing that annoyed me was I thought I had a bug in my project which could cost me more points than the 10% off I would receive if I turned it in late. What I thought was a bug was when I sent a background process which printed out to stdout (e.g. ls&) control would not come backto the terminal. I thought this was a bug and I spent two days trying to figure it out. Low and behold, it's the actual behavior of the Linux shell. I theorize it's because the child process has to print out to stdout which leaves some sort of hook until the user inputs something else.
+
+Another war story was the whole readline memory error thing. I spent far too long on that before I saw on Piazza that it has a memory leak and the dox README outlining the suppression.
+
+I have to say some of the things which went wrong with this project took quite some time to figure out. Unfortunately, my personality is that I don't like asking for help on things like this and I want to figure them out on my own, even if that means sacrificing a lot of time on the project.

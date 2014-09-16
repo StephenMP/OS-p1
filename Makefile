@@ -1,17 +1,17 @@
-
 CC=gcc
-CFLAGS= -g   -Wall 
-LIBS=-lreadline -lncurses
+CFLAGS= -g   -Wall -Llib
+LIBS=-lreadline -lncurses -lmylib
 
-PROGS=test-readline loop 
+PROGS=library mydash
+OBJECTS=Parser.o JobManager.o error.o
 
 all: $(PROGS) dox
 
-loop: loop.o
-	$(CC) $(CFLAGS) -o $@  $<
+library:
+	cd libsrc; make install
 
-test-readline: test-readline.o
-	$(CC) $(CFLAGS) -o $@  $< $(LIBS)
+mydash: mydash.o $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $< $(LIBS)
 
 dox:
 	echo "Generating documentation using doxygen..."
@@ -20,5 +20,7 @@ dox:
 
 
 clean:
+	cd libsrc; make installclean
 	/bin/rm -f *.o $(PROGS) a.out core  *.log
 	/bin/rm -fr docs
+	/bin/rm -f *.uncrustify
