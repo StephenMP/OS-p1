@@ -6,8 +6,7 @@ CC=gcc
 CFLAGS=-Wall -g -fPIC -shared -I$(INCLUDE)/
 LFLAGS=-L$(LIB) -lmylib
 
-
-LIBOBJS=List.o Node.o
+LIBOBJS=List.o Node.o Object.o
 
 all: libs 
 
@@ -26,6 +25,7 @@ install: libs
 	install --mode=644  List.h $(INCLUDE)/
 	install --mode=644  Node.h $(INCLUDE)/
 	install --mode=644  common.h $(INCLUDE)/
+	install --mode=644  Object.h $(INCLUDE)/
 	install --mode=755  libmylib.so $(LIB)/libmylib.so
 	install --mode=755  libmylib.a $(LIB)/libmylib.a
 
@@ -35,7 +35,7 @@ installclean:  clean
 	rm --force $(INCLUDE)/List.h
 	rm --force $(INCLUDE)/Node.h
 	rm --force $(INCLUDE)/common.h
-	
+	rm --force $(INCLUDE)/Object.h
 clean:
 	rm --force list *.o a.out core libmylib.a libmylib.so
 

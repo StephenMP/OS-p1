@@ -83,3 +83,5 @@ Now for the hate. The number one thing that annoyed me was I thought I had a bug
 Another war story was the whole readline memory error thing. I spent far too long on that before I saw on Piazza that it has a memory leak and the dox README outlining the suppression.
 
 I have to say some of the things which went wrong with this project took quite some time to figure out. Unfortunately, my personality is that I don't like asking for help on things like this and I want to figure them out on my own, even if that means sacrificing a lot of time on the project.
+
+Last, I gave up on my unit-style testing and reverted to just manual testing because too often could something change and ruin my tests. For example, a date call, the date changes so the expected output would have to change for the test to pass. This style of testing failed miserably!

@@ -10,22 +10,24 @@ if test "$2" != ""
 then
 	debug=$2
 fi
-count=10
 
-$program < inputs/test1.in > outputs/test1.out
+
+for t in $PWD/test-* ; do
+$program < $t/input.txt > $t/output.txt
 
 if test "$debug" = "true"
 then
-	diff  outputs/test1.out outputs/test1.out.correct 
+	diff  $t/output.txt $t/correct.txt
 else
-	diff  outputs/test1.out outputs/test1.out.correct >& /dev/null
+	diff  $t/output.txt $t/correct.txt >& /dev/null
 fi
 
 if test "$?" = "0"
 then
-	echo "test1 passed!"
+	echo ${t##*/} "PASSED!"
 else
-	echo "test1 FAILED!"
+	echo ${t##*/} "FAILED!"
 fi
+done
 
 

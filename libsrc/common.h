@@ -5,7 +5,9 @@
 #include <string.h>
 
 #define TRUE 1
-#define FALSE  0
+#define FALSE 0
+#define EQUAL 0
+#define CHDIR_SUCCESS 0
 
 typedef int Boolean;
 

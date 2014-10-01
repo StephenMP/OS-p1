@@ -1,0 +1,29 @@
+[?1034hmydash> cd ..
+mydash> ls -a
+.
+..
+build
+docs
+doxygen-config
+doxygen.log
+error.c
+error.o
+.git
+include
+JobManager.c
+JobManager.o
+kr-indent.cfg
+lib
+libsrc
+Makefile
+mydash
+mydash.c
+mydash.o
+Parser.c
+Parser.o
+README
+README.dox
+.README.kate-swp
+test-harness
+valgrind.supp
+mydash> 

@@ -15,16 +15,76 @@
 #include "include/Parser.h"
 #include "include/JobManager.h"
 
+void execute(char **a, char *c, Boolean b);
+void changeDirectory(char* p);
+int initShell(void);
+
 static ListPtr list;
+
+/**
+ * Signal handler to monitor children and
+ * zombies. When a child exits, it is killed
+ *
+ * @param S the signal #
+ */
+void zombieHunter(int S)
+{
+	ObjectPtr job;
+	NodePtr node;
+	pid_t cpid;
+	int status;
+
+	/* Wait on the child to change */
+	if ((cpid = waitpid(-1, &status, WNOHANG)) > 0) {
+		/* Get a handle into the start of the job list */
+		node = getHead(list);
+
+		/* Loop our list looking for the done job(s) */
+		while (node != NULL) {
+			job = ((ObjectPtr)node->obj);
+
+			/* Update the job once found */
+			if (job->procId == cpid) {
+				job->done = TRUE;
+				job->status = status;
+				kill(cpid, SIGKILL);
+				break;
+			}
+
+			/* Iterate */
+			node = node->next;
+		}
+	}
+}
 
 /**
  * Main insertion
  */
 int main(int argc, char *args[])
 {
+	/* Process any command line options, may exit */
+	parseOptions(argc, args);
+
+	/* Initialize our job list */
+	list = createList(compareTo, toString, freeObject);
+
+	/* Initialize the history library */
+	using_history();
+
+	/* Setup our signal to manage zombies */
+	signal(SIGCHLD, zombieHunter);
+
+	/* 'Initialize' our shell, exit off shell break */
 	return initShell();
 }
 
+/**
+ * Function to handle the execution of a task.
+ *
+ * @param argv the parsed char** manipulated by parseCommand
+ * @param command a copy of the the command input
+ * @param isBackground a <code>Boolean</code> True if '&' was entered; false otherwise
+ */
 void execute(char **argv, char *command, Boolean isBackground)
 {
 	/* Fork our child */
@@ -49,17 +109,52 @@ void execute(char **argv, char *command, Boolean isBackground)
 	}
 	/* We are the parent */
 	else{
-		while (wait(&status) != pid) ;
+		/* Handle a background job */
+		if (isBackground) {
+			incrJobId();
+
+			/* Inform user of job creation */
+			printf("[%d] %d \"%s\"\n", getJobId(), (int)pid, command);
+
+			/* Add job to our job list */
+			addAtRear(list, createNode(createObject(getJobId(), (int)pid, command)));
+		}
+		/* Otherwise, we'll just wait for job to execute */
+		else
+			while (wait(&status) != pid)
+				;
 	}
 }
 
+/**
+ * Function to change directories to a specified path.
+ * If cd fails, an error is printed, errnor is written
+ * to, user is promopted, and the shell continues.
+ *
+ * @param path a string representing the path entered
+ */
 void changeDirectory(char* path)
 {
+	struct passwd *pwd;
 
+	if (path == NULL) {
+		pwd = getpwuid(getuid());
+		path = pwd->pw_dir;
+	}
+
+	if (chdir(path) != CHDIR_SUCCESS)
+		err_ret("Error changing directory");
 }
 
+/**
+ * The bread and butter, the shell code. What else to
+ * say? It drives the shell!
+ *
+ * @return <code>int</code> exit code. 0 on sucess
+ */
 int initShell()
 {
+	/* Need to allow 2048 args */
 	char    *argv[2048];
 	char    *line;
 	char    *command;
@@ -74,10 +169,13 @@ int initShell()
 		command = (char*)malloc(sizeof(char) * (strlen(line) + 1));
 		strcpy(command, line);
 
+		backgroundJob = parseAmp(line);
+
 		/* Handle if user just pressed enter or input just whitespace */
 		if (parseEmptyLine(line) == TRUE) {
 			free(line);
 			free(command);
+			checkJobs(list);
 			continue;
 		}
 
@@ -93,6 +191,7 @@ int initShell()
 		/* Handle cd */
 		if (strcmp(argv[0], "cd") == EQUAL) {
 			changeDirectory(argv[1]);
+			checkJobs(list);
 			free(command);
 			free(line);
 			continue;
@@ -100,17 +199,25 @@ int initShell()
 
 		/* Handle jobs command */
 		if (strcmp(argv[0], "jobs") == EQUAL) {
-			printf("Not yet supported");
+			printJobs(list);
+			cleanJobs(list);
+			free(command);
+			free(line);
 			continue;
 		}
 
 		/* Execute a job */
 		execute(argv, command, backgroundJob);
+		checkJobs(list);
 
 		/* Keep it clean */
 		free(command);
 		free(line);
 	}
+
+	/* Free blocks in case we exit loop */
+	if (!isEmpty(list))
+		killJobs(list);
 
 	freeList(list);
 	free(command);

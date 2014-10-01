@@ -1,0 +1,27 @@
+[?1034hmydash> cd ..
+mydash> ls -a
+.
+..
+docs
+doxygen-config
+doxygen.log
+error.c
+.git
+include
+JobManager.c
+JobManager.h
+JobManager.o
+kr-indent.cfg
+lib
+libsrc
+Makefile
+mydash
+mydash.c
+mydash.o
+Parser.c
+Parser.h
+Parser.o
+README.dox
+test-harness
+valgrind.supp
+mydash> 

@@ -1,0 +1,2 @@
+[?1034hmydash> fake command
+mydash> 
