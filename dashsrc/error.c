@@ -1,7 +1,7 @@
 
 #include        <errno.h>               /* for definition of errno */
 #include        <stdarg.h>              /* ANSI C header file */
-#include        "include/ourhdr.h"
+#include        "../include/ourhdr.h"
 
 static void     err_doit(int, const char *, va_list);
 

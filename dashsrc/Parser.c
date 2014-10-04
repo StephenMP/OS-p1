@@ -1,4 +1,4 @@
-#include "include/Parser.h"
+#include "../include/Parser.h"
 
 void parseCommand(char *line, char **argv)
 {

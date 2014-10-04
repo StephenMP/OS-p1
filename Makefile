@@ -3,7 +3,7 @@ CFLAGS= -g   -Wall -Llib
 LIBS=-lreadline -lncurses -lmylib
 
 PROGS=library mydash
-OBJECTS=Parser.o JobManager.o error.o
+OBJECTS=dashsrc/Parser.o dashsrc/JobManager.o dashsrc/error.o
 
 all: $(PROGS) dox
 
@@ -22,5 +22,6 @@ dox:
 clean:
 	cd libsrc; make installclean
 	/bin/rm -f *.o $(PROGS) a.out core  *.log
+	/bin/rm -f dashsrc/*.o
 	/bin/rm -fr docs
 	/bin/rm -f *.uncrustify
