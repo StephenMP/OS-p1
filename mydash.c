@@ -35,16 +35,16 @@ void zombieHunter(int S)
 	int status;
 
 	/* Wait on the child to change */
-	if ((cpid = waitpid(-1, &status, WNOHANG)) > 0) {
+	if((cpid = waitpid(-1, &status, WNOHANG)) > 0) {
 		/* Get a handle into the start of the job list */
 		node = getHead(list);
 
 		/* Loop our list looking for the done job(s) */
-		while (node != NULL) {
+		while(node != NULL) {
 			job = ((ObjectPtr)node->obj);
 
 			/* Update the job once found */
-			if (job->procId == cpid) {
+			if(job->procId == cpid) {
 				job->done = TRUE;
 				job->status = status;
 				kill(cpid, SIGKILL);
@@ -55,6 +55,18 @@ void zombieHunter(int S)
 			node = node->next;
 		}
 	}
+}
+
+/**
+ * Signal handler to catch ctrl+c and
+ * force a core dump.
+ *
+ * @param S the signal #
+ */
+void ctrCHandler(int S)
+{
+	/* Force a core dump by raising a SIGQUIT */
+	raise(SIGQUIT);
 }
 
 /**
@@ -73,6 +85,9 @@ int main(int argc, char *args[])
 
 	/* Setup our signal to manage zombies */
 	signal(SIGCHLD, zombieHunter);
+
+	/* Setup signal hander for ctrl+c */
+	signal(SIGINT, ctrCHandler);
 
 	/* 'Initialize' our shell, exit off shell break */
 	return initShell();
@@ -93,24 +108,23 @@ void execute(char **argv, char *command, Boolean isBackground)
 	/* Hook to track status */
 	int status = 0;
 
-	/* Attempt to fork a child proc */
-	if (pid < 0) {
+	/* Check attempt to fork a child proc */
+	if(pid < 0)
 		err_sys("Error forking");
-	}
 
 	/* We are the child */
-	if (pid == 0) {
+	if(pid == 0) {
 		/* Have the child execute the command */
 		int result = execvp(*argv, argv);
 
 		/* Handle any forking errors */
-		if (result < 0)
+		if(result < 0)
 			err_sys("Exec failed");
 	}
 	/* We are the parent */
-	else{
+	else {
 		/* Handle a background job */
-		if (isBackground) {
+		if(isBackground) {
 			incrJobId();
 
 			/* Inform user of job creation */
@@ -121,8 +135,7 @@ void execute(char **argv, char *command, Boolean isBackground)
 		}
 		/* Otherwise, we'll just wait for job to execute */
 		else
-			while (wait(&status) != pid)
-				;
+			while(wait(&status) != pid) ;
 	}
 }
 
@@ -137,12 +150,14 @@ void changeDirectory(char* path)
 {
 	struct passwd *pwd;
 
-	if (path == NULL) {
+    /* If just cd, go to home directory */
+	if(path == NULL || parseEmptyLine(path)) {
 		pwd = getpwuid(getuid());
 		path = pwd->pw_dir;
 	}
 
-	if (chdir(path) != CHDIR_SUCCESS)
+    /* Otherwise, change to specified directory */
+	if(chdir(path) != CHDIR_SUCCESS)
 		err_ret("Error changing directory");
 }
 
@@ -155,24 +170,24 @@ void changeDirectory(char* path)
 int initShell()
 {
 	/* Need to allow 2048 args */
-	char    *argv[2048];
-	char    *line;
-	char    *command;
+	char *argv[2048];
+	char *line;
+	char *command;
 	Boolean backgroundJob = FALSE;
 
 	/* Get the prompt for our shell */
 	char *prompt = getenv("DASH_PROMPT");
-	if (prompt == NULL)
+	if(prompt == NULL)
 		prompt = "mydash> ";
 
-	while ((line = readline(prompt))) {
+	while((line = readline(prompt))) {
 		command = (char*)malloc(sizeof(char) * (strlen(line) + 1));
 		strcpy(command, line);
 
 		backgroundJob = parseAmp(line);
 
 		/* Handle if user just pressed enter or input just whitespace */
-		if (parseEmptyLine(line) == TRUE) {
+		if(parseEmptyLine(line) == TRUE) {
 			free(line);
 			free(command);
 			checkJobs(list);
@@ -186,10 +201,10 @@ int initShell()
 		parseCommand(line, argv);
 
 		/* Handle exit */
-		if (strcmp(argv[0], "exit") == EQUAL) break;
+		if(strcmp(argv[0], "exit") == EQUAL) break;
 
 		/* Handle cd */
-		if (strcmp(argv[0], "cd") == EQUAL) {
+		if(strcmp(argv[0], "cd") == EQUAL) {
 			changeDirectory(argv[1]);
 			checkJobs(list);
 			free(command);
@@ -198,7 +213,7 @@ int initShell()
 		}
 
 		/* Handle jobs command */
-		if (strcmp(argv[0], "jobs") == EQUAL) {
+		if(strcmp(argv[0], "jobs") == EQUAL) {
 			printJobs(list);
 			cleanJobs(list);
 			free(command);
@@ -216,7 +231,7 @@ int initShell()
 	}
 
 	/* Free blocks in case we exit loop */
-	if (!isEmpty(list))
+	if(!isEmpty(list))
 		killJobs(list);
 
 	freeList(list);
