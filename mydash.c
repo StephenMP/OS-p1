@@ -58,18 +58,6 @@ void zombieHunter(int S)
 }
 
 /**
- * Signal handler to catch ctrl+c and
- * force a core dump.
- *
- * @param S the signal #
- */
-void ctrCHandler(int S)
-{
-	/* Force a core dump by raising a SIGQUIT */
-	raise(SIGQUIT);
-}
-
-/**
  * Main insertion
  */
 int main(int argc, char *args[])
@@ -85,9 +73,6 @@ int main(int argc, char *args[])
 
 	/* Setup our signal to manage zombies */
 	signal(SIGCHLD, zombieHunter);
-
-	/* Setup signal hander for ctrl+c */
-	signal(SIGINT, ctrCHandler);
 
 	/* 'Initialize' our shell, exit off shell break */
 	return initShell();
@@ -150,13 +135,13 @@ void changeDirectory(char* path)
 {
 	struct passwd *pwd;
 
-    /* If just cd, go to home directory */
+	/* If just cd, go to home directory */
 	if(path == NULL || parseEmptyLine(path)) {
 		pwd = getpwuid(getuid());
 		path = pwd->pw_dir;
 	}
 
-    /* Otherwise, change to specified directory */
+	/* Otherwise, change to specified directory */
 	if(chdir(path) != CHDIR_SUCCESS)
 		err_ret("Error changing directory");
 }
@@ -174,13 +159,16 @@ int initShell()
 	char *line;
 	char *command;
 	Boolean backgroundJob = FALSE;
+	Boolean processedJob = FALSE;
 
 	/* Get the prompt for our shell */
 	char *prompt = getenv("DASH_PROMPT");
 	if(prompt == NULL)
 		prompt = "mydash> ";
 
+	/* Collect input */
 	while((line = readline(prompt))) {
+		processedJob = TRUE;
 		command = (char*)malloc(sizeof(char) * (strlen(line) + 1));
 		strcpy(command, line);
 
@@ -226,6 +214,7 @@ int initShell()
 		checkJobs(list);
 
 		/* Keep it clean */
+		processedJob = FALSE;
 		free(command);
 		free(line);
 	}
@@ -234,8 +223,17 @@ int initShell()
 	if(!isEmpty(list))
 		killJobs(list);
 
+    /* Free our job list */
 	freeList(list);
-	free(command);
-	free(line);
+
+	/* We only need to free these if we started a job but didn't finish */
+	if(processedJob) {
+		free(command);
+		free(line);
+	}
+	/* We got EOF, raise SIGABRT to force core dump */
+	else{
+        raise(SIGABRT);
+	}
 	return 0;
 }
